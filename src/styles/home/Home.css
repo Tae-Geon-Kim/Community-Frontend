@@ -1,0 +1,86 @@
+/* src/styles/home/Home.css */
+.home-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  text-align: center;
+  padding: 20px;
+}
+
+.hero-section {
+  margin-bottom: 40px;
+}
+
+.hero-title {
+  font-size: 48px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.hero-subtitle {
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-bottom: 50px;
+}
+
+.btn {
+  padding: 12px 24px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.btn-primary { background-color: #007bff; color: white; }
+.btn-primary:hover { background-color: #0056b3; }
+
+.btn-secondary { background-color: #28a745; color: white; }
+.btn-secondary:hover { background-color: #218838; }
+
+.btn-outline { background-color: transparent; border: 2px solid #007bff; color: #007bff; }
+.btn-outline:hover { background-color: #f0f8ff; }
+
+/* 계정 복구 섹션 */
+.recovery-wrapper {
+  background-color: #f8f9fa;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  width: 100%;
+  max-width: 400px;
+}
+
+.recovery-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.recovery-input {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.recovery-toggle-text {
+  color: #6c757d;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.recovery-toggle-text:hover {
+  color: #343a40;
+}
