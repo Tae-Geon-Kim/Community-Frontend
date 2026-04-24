@@ -1,0 +1,35 @@
+.board-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.board-input {
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.board-textarea {
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  min-height: 300px;
+  resize: vertical;
+}
+
+.submit-button {
+  padding: 15px;
+  font-size: 18px;
+  margin-top: 10px;
+}
+
+/* 색상별 버튼 추가 스타일 */
+.btn-secondary {
+  background-color: #6c757d;
+}
+.btn-primary {
+  background-color: #007bff;
+}
