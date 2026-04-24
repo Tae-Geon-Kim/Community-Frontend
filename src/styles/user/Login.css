@@ -1,0 +1,62 @@
+/* 전체 로그인 박스 */
+.login-container {
+  padding: 40px;
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* 안내문 텍스트 */
+.login-guide {
+  font-size: 12px;
+  color: gray;
+}
+
+/* 입력창 감싸는 박스 */
+.input-wrapper {
+  margin-bottom: 15px;
+}
+
+/* 아이디, 비밀번호 입력창 */
+.login-input {
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+/* 에러 메시지 */
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+/* 파란색 로그인 버튼 */
+.login-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* 회원가입 영역 */
+.register-wrapper {
+  margin-top: 20px;
+}
+
+.register-text {
+  font-size: 14px;
+  color: gray;
+}
+
+/* 회원가입 링크 버튼 */
+.register-button {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  text-decoration: underline;
+}
