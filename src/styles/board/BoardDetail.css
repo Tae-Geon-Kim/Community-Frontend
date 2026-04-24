@@ -1,0 +1,20 @@
+.loading-container {
+  padding: 40px;
+  text-align: center;
+}
+
+.post-info {
+  border-top: 2px solid #333;
+  border-bottom: 1px solid #ddd;
+  padding: 15px 10px;
+  display: flex;
+  justify-content: space-between;
+  background-color: #f8f9fa;
+}
+
+.post-content {
+  padding: 30px 10px;
+  min-height: 300px;
+  line-height: 1.6;
+  white-space: pre-wrap; /* 줄바꿈 유지 */
+}
