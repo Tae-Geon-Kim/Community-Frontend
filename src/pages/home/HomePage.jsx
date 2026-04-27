@@ -1,17 +1,33 @@
 // src/pages/home/HomePage.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-// 나중에 복구 API를 만들면 여기에 import 하세요!
+import { my_infoAPI } from "@/api/user"; // 🌟 로그인 상태 확인용 API 추가
 // import { restoreAccountApi } from "@/api/auth";
 import "@/styles/home/Home.css";
 
 export default function HomePage() {
   const navigate = useNavigate();
   
-  // 복구 폼을 보여줄지 말지 결정하는 스위치
   const [showRecovery, setShowRecovery] = useState(false);
   const [recoverId, setRecoverId] = useState("");
   const [recoverPassword, setRecoverPassword] = useState("");
+  
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState("");
+
+  // 홈페이지 켜질 때 쿠키로 로그인 상태 체크
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const data = await my_infoAPI();
+        setIsLoggedIn(true);
+        setUserName(data.data?.id || data.id); // 로그인된 아이디 저장
+      } catch (error) {
+        setIsLoggedIn(false); // 쿠키가 없거나 만료되면 미로그인 상태로 둠
+      }
+    };
+    checkLoginStatus();
+  }, []);
 
   const handleRecoverySubmit = async (e) => {
     e.preventDefault();
@@ -21,14 +37,11 @@ export default function HomePage() {
     }
 
     try {
-      // 🌟 나중에 백엔드 API가 완성되면 이 주석을 풀고 연결하세요!
       // await restoreAccountApi(recoverId, recoverPassword);
-      
       console.log("복구 요청 데이터:", { id: recoverId, password: recoverPassword });
       alert("계정 복구가 성공적으로 완료되었습니다! 다시 로그인해주세요.");
-      setShowRecovery(false); // 폼 닫기
-      navigate("/login"); // 로그인 창으로 보내기
-      
+      setShowRecovery(false); 
+      navigate("/login"); 
     } catch (error) {
       console.error("복구 실패:", error);
       alert("일치하는 탈퇴 정보가 없거나 복구에 실패했습니다.");
@@ -46,58 +59,76 @@ export default function HomePage() {
         </p>
       </div>
 
-      {/* 2. 메인 액션 버튼들 */}
+      {/* 2. 메인 액션 버튼들 (로그인 상태에 따라 다르게 보임) */}
       <div className="action-buttons">
-        <button className="btn btn-primary" onClick={() => navigate("/login")}>
-          로그인
-        </button>
-        <button className="btn btn-secondary" onClick={() => navigate("/register")}>
-          회원가입
-        </button>
-        <button className="btn btn-outline" onClick={() => navigate("/board")}>
-          게시판 구경하기
-        </button>
+        {isLoggedIn ? (
+          <>
+            <h3 style={{ width: "100%", textAlign: "center", marginBottom: "15px", color: "#333" }}>
+              환영합니다, {userName}님! 👋
+            </h3>
+            <button className="btn btn-primary" onClick={() => navigate("/mypage")}>
+              마이페이지
+            </button>
+            <button className="btn btn-outline" onClick={() => navigate("/board")}>
+              게시판 가기
+            </button>
+          </>
+        ) : (
+          <>
+            <button className="btn btn-primary" onClick={() => navigate("/login")}>
+              로그인
+            </button>
+            <button className="btn btn-secondary" onClick={() => navigate("/register")}>
+              회원가입
+            </button>
+            <button className="btn btn-outline" onClick={() => navigate("/board")}>
+              게시판 구경하기
+            </button>
+          </>
+        )}
       </div>
 
-      {/* 3. 숨겨진 계정 복구 섹션 */}
-      {!showRecovery ? (
-        <span className="recovery-toggle-text" onClick={() => setShowRecovery(true)}>
-          혹시 계정을 삭제하셨나요? (계정 복구)
-        </span>
-      ) : (
-        <div className="recovery-wrapper">
-          <h3>계정 복구</h3>
-          <p style={{ fontSize: "12px", color: "#666" }}>
-            탈퇴 시 사용했던 아이디와 비밀번호를 입력해주세요.
-          </p>
-          <form className="recovery-form" onSubmit={handleRecoverySubmit}>
-            <input
-              type="text"
-              placeholder="아이디"
-              className="recovery-input"
-              value={recoverId}
-              onChange={(e) => setRecoverId(e.target.value)}
-            />
-            <input
-              type="password"
-              placeholder="비밀번호"
-              className="recovery-input"
-              value={recoverPassword}
-              onChange={(e) => setRecoverPassword(e.target.value)}
-            />
-            <button type="submit" className="btn btn-primary" style={{ marginTop: "10px" }}>
-              복구하기
-            </button>
-            <button 
-              type="button" 
-              className="btn btn-outline" 
-              style={{ marginTop: "5px" }}
-              onClick={() => setShowRecovery(false)}
-            >
-              취소
-            </button>
-          </form>
-        </div>
+      {/* 3. 숨겨진 계정 복구 섹션 (미로그인 상태일 때만 보임) */}
+      {!isLoggedIn && (
+        !showRecovery ? (
+          <span className="recovery-toggle-text" onClick={() => setShowRecovery(true)}>
+            혹시 계정을 삭제하셨나요? (계정 복구)
+          </span>
+        ) : (
+          <div className="recovery-wrapper">
+            <h3>계정 복구</h3>
+            <p style={{ fontSize: "12px", color: "#666" }}>
+              탈퇴 시 사용했던 아이디와 비밀번호를 입력해주세요.
+            </p>
+            <form className="recovery-form" onSubmit={handleRecoverySubmit}>
+              <input
+                type="text"
+                placeholder="아이디"
+                className="recovery-input"
+                value={recoverId}
+                onChange={(e) => setRecoverId(e.target.value)}
+              />
+              <input
+                type="password"
+                placeholder="비밀번호"
+                className="recovery-input"
+                value={recoverPassword}
+                onChange={(e) => setRecoverPassword(e.target.value)}
+              />
+              <button type="submit" className="btn btn-primary" style={{ marginTop: "10px" }}>
+                복구하기
+              </button>
+              <button 
+                type="button" 
+                className="btn btn-outline" 
+                style={{ marginTop: "5px" }}
+                onClick={() => setShowRecovery(false)}
+              >
+                취소
+              </button>
+            </form>
+          </div>
+        )
       )}
     </div>
   );

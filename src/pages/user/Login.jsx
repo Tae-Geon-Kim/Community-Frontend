@@ -16,10 +16,10 @@ export default function Login() {
     }
 
     try {
-      await loginApi(userId, password);
+      const data = await loginApi(userId, password);
       
       alert("로그인에 성공하였습니다.");
-      navigate("/board"); 
+      navigate("/"); 
       
     } catch (error) {
       if (error.response && error.response.data && error.response.data.detail) {
