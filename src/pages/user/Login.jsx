@@ -16,10 +16,7 @@ export default function Login() {
     }
 
     try {
-      const data = await loginApi(userId, password);
-      
-      localStorage.setItem("access_token", data.access_token);
-      localStorage.setItem("refresh_token", data.refresh_token);
+      await loginApi(userId, password);
       
       alert("로그인에 성공하였습니다.");
       navigate("/board"); 
