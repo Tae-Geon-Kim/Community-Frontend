@@ -1,83 +1,135 @@
-// src/pages/BoardListPage.jsx
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { all_board_infoAPI } from "@/api/board";
+import { Link } from "react-router-dom";
+import { all_board_infoAPI, user_board_infoAPI } from "@/api/board";
 import "@/styles/board/BoardList.css";
 
 export default function BoardList() {
-  const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
+  const [searchId, setSearchId] = useState(""); 
+  const [isFiltered, setIsFiltered] = useState(false); 
 
-  useEffect(() => {
-    const fetchBoards = async () => {
-      try {
-        const responseData = await all_board_infoAPI();
-        console.log("원본 백엔드 데이터:", responseData); 
+  const fetchPosts = async (userId = "") => {
+    setLoading(true);
+    try {
+      if (userId) {
+        // 1. 특정 유저 검색 시 데이터 처리
+        const response = await user_board_infoAPI(userId);
+        const data = response.data || {};
         
-        const rawData = responseData.data || [];
+        let userPosts = Array.isArray(data) ? data : (data.posts || []);
         
-        // 사용자별로 묶인 데이터를 다 풀어서 하나의 리스트로
-        const flatPosts = rawData.flatMap((userGroup) => {
-          const userPosts = userGroup.posts || []; // 안쪽의 게시글 배열을 꺼냅니다.
-          return userPosts.map((post) => ({
-            ...post, // 기존 게시글 정보(번호, 제목 등)는 그대로 유지
-            author: userGroup.author // 겉 폴더에 있던 작성자 이름표를 게시글 안쪽에 붙인다
+        userPosts = userPosts.map(post => ({
+          ...post,
+          user_id: userId
+        }));
+
+        setPosts(userPosts);
+        setIsFiltered(true);
+      } else {
+        // 🌟 2. 전체 목록 조회 시 데이터 평탄화 (작성자 이름 버그 완벽 해결!)
+        const response = await all_board_infoAPI();
+        const allData = response.data || [];
+        
+        const flatPosts = allData.flatMap(userGroup => {
+          const groupPosts = userGroup.posts || [];
+          // 💡 백엔드 스키마에 정의된 정확한 이름인 'author'를 사용합니다!
+          const authorId = userGroup.author || "알 수 없음";
+
+          return groupPosts.map(post => ({
+            ...post,
+            // 프론트엔드 테이블에서 user_id로 렌더링하도록 통일
+            user_id: authorId
           }));
         });
+        
+        // 최신 글이 맨 위로 오게 정렬
+        flatPosts.sort((a, b) => {
+          const indexA = a.index || a.board_index || 0;
+          const indexB = b.index || b.board_index || 0;
+          return indexB - indexA; 
+        });
 
-        // 글 번호(index)를 기준으로 내림차순 정렬 -> 최신 글이 항상 위로
-        flatPosts.sort((a, b) => b.index - a.index);
-
-        console.log(" 화면용으로 변환된 데이터:", flatPosts); 
-        setPosts(flatPosts); // 합쳐진 데이터를 리액트
-
-      } catch (error) {
-        console.error("게시글 목록을 불러오는 중 에러 발생:", error);
+        setPosts(flatPosts);
+        setIsFiltered(false);
       }
-    };
+    } catch (error) {
+      console.error("게시글 로딩 실패:", error);
+      setPosts([]); 
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchBoards();
+  useEffect(() => {
+    fetchPosts(); 
   }, []);
 
-  return (
-    <div className="board-container">
-      <div className="board-header">
-        <h2>자유 게시판</h2>
-        <button onClick={() => navigate("/board/write")} className="write-button">
-          글쓰기
-        </button>
-      </div>
-      
-      <table className="board-table">
-        <thead>
-          <tr>
-            <th style={{ width: "10%" }}>번호</th>
-            <th style={{ width: "50%" }}>제목</th>
-            <th style={{ width: "20%" }}>작성자</th>
-            <th style={{ width: "20%" }}>작성일</th>
-          </tr>
-        </thead>
-        <tbody>
+  const handleSearch = () => {
+    if (!searchId.trim()) {
+      alert("검색할 아이디를 입력해주세요!");
+      return;
+    }
+    fetchPosts(searchId.trim());
+  };
 
-          {Array.isArray(posts) && posts.map((post) => (
-            <tr key={post.index}>
-              <td>{post.index}</td>
-              <td style={{ textAlign: "left" }}>
-                <span 
-                  className="post-title"
-                  onClick={() => navigate(`/board/${post.index}`)}
-                >
-                  {post.title}
-                </span>
-              </td>
-              <td>{post.author}</td>
-              <td>
-                {post.reg_date ? post.reg_date.substring(0, 10) : ""}
-              </td>
+  const handleReset = () => {
+    setSearchId("");
+    fetchPosts();
+  };
+
+  return (
+    <div className="board-list-container">
+      <h2>자유 게시판</h2>
+
+      <div className="search-bar">
+        <input 
+          type="text" 
+          placeholder="유저 아이디로 검색..." 
+          value={searchId}
+          onChange={(e) => setSearchId(e.target.value)}
+          onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+          className="search-input"
+        />
+        <button onClick={handleSearch} className="search-button">검색</button>
+        {isFiltered && (
+          <button onClick={handleReset} className="reset-button">전체 보기</button>
+        )}
+      </div>
+
+      {loading ? (
+        <div className="loading">데이터를 불러오는 중...</div>
+      ) : posts.length === 0 ? (
+        <div className="no-posts">
+          {isFiltered ? "해당 유저가 작성한 게시글이 없습니다." : "작성된 게시글이 없습니다."}
+        </div>
+      ) : (
+        <table className="board-table">
+          <thead>
+            <tr>
+              <th>번호</th>
+              <th>제목</th>
+              <th>작성자</th>
+              <th>작성일</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {posts.map((post) => (
+              <tr key={post.index || post.board_index}>
+                <td>{post.index || post.board_index}</td>
+                <td className="post-title">
+                  <Link to={`/board/${post.index || post.board_index}`}>{post.title}</Link>
+                </td>
+                {/* 작성자 정상 출력 */}
+                <td>{post.user_id}</td> 
+                {/* 💡 날짜 버그 수정: 백엔드 스키마에 맞춰 reg_date 로 변경! */}
+                <td>{new Date(post.reg_date || Date.now()).toLocaleDateString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }
