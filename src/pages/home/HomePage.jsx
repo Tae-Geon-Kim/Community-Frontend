@@ -1,9 +1,9 @@
 // src/pages/home/HomePage.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { my_infoAPI } from "@/api/user"; // 🌟 로그인 상태 확인용 API 추가
-// import { restoreAccountApi } from "@/api/auth";
+import { my_infoAPI, restore_meAPI } from "@/api/user";
 import "@/styles/home/Home.css";
+
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -37,7 +37,8 @@ export default function HomePage() {
     }
 
     try {
-      // await restoreAccountApi(recoverId, recoverPassword);
+      await restore_meAPI(recoverId, recoverPassword);
+
       console.log("복구 요청 데이터:", { id: recoverId, password: recoverPassword });
       alert("계정 복구가 성공적으로 완료되었습니다! 다시 로그인해주세요.");
       setShowRecovery(false); 
@@ -52,9 +53,9 @@ export default function HomePage() {
     <div className="home-container">
       {/* 1. 커뮤니티 소개 (Hero) */}
       <div className="hero-section">
-        <h1 className="hero-title">자유로운 소통 공간</h1>
+        <h1 className="hero-title">게시판</h1>
         <p className="hero-subtitle">
-          지금 가입하고 다양한 사람들과 이야기를 나눠보세요! <br/>
+          로그인하여 게시판을 작성해보세요. <br/>
           로그인 없이도 자유 게시판을 구경할 수 있습니다.
         </p>
       </div>

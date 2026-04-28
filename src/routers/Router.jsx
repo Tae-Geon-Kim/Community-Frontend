@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Header from "@/components/Header";
 import HomePage from "@/pages/home/HomePage";
 import Login from "@/pages/user/Login"; 
 import Register from "@/pages/user/Register";
@@ -10,7 +11,10 @@ import MyPage from "@/pages/user/MyPage";
 export default function Router() {
   return (
     <BrowserRouter>
+      <Header />
+
       <Routes>
+
         <Route path="/" element={<HomePage />} />   
              
         <Route path="/login" element={<Login />} /> 

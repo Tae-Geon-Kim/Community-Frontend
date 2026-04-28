@@ -1,3 +1,4 @@
+import axios from "axios";
 import axiosInstance from "./axiosInstance";
 
 // 1. 로그인 요청 (POST /users/login)
@@ -37,6 +38,18 @@ export const register_userApi = async (id, password) => {
     return response.data;
   } catch (error) {
     console.error("회원가입 API 에러:", error);
+    throw error;
+  }
+};
+
+// 4. 로그아웃 요청 (POST /users/logout)
+export const logoutAPI = async() => {
+  try {
+    const response = await axiosInstance.post("users/logout");
+    
+    return response.data;
+  } catch(error) {
+    console.error("로그아웃 API 에러: ", error);
     throw error;
   }
 };
