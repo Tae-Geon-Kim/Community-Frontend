@@ -34,7 +34,6 @@ export default function BoardDetail() {
       // Pydantic 형식 에러 (배열 형태) -> 첫 번째 에러 메시지만
       alert(detail[0].msg);
     } else if (typeof detail === "string") {
-      // 일반 HTTP 에러 (문자열 형태) -> 비밀번호 틀림 같은 에러
       alert(detail);
     } else {
       alert(defaultMsg);
