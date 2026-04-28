@@ -14,21 +14,21 @@ export const register_board_API = async (title, content) => {
     }
 };
 
-// 2. 특정 게시글 조회 - 로그인 x (GET/users/{user_id})
-export const user_board_infoAPI = async (user_id) => {
+// 2. 특정 게시글 하나 조회 - 로그인 x (GET/{board_index})
+export const single_board_infoAPI = async(board_index) => {
     try {
-        const response = await axiosInstance.get(`/boards/users/${user_id}`)
+        const response = await axiosInstance.get(`/boards/${board_index}`)
         return response.data
     } catch(error) {
-        console.error("전체 게시글 조회 에러: ", error);
+        console.error("특정 게시글 하나 조회 에러: ", error);
         throw error;
     }
 };
 
-// 3. 전체 게시글 조회 - 로그인 x (GET/)
-export const all_board_infoAPI = async () => {
+// 3. 특정 유저의 게시글 조회 - 로그인 x (GET/users/{user_id})
+export const user_board_infoAPI = async (user_id) => {
     try {
-        const response = await axiosInstance.get("/boards")
+        const response = await axiosInstance.get(`/boards/users/${user_id}`)
         return response.data
     } catch(error) {
         console.error("유저 게시글 조회 에러: ", error);
@@ -36,7 +36,18 @@ export const all_board_infoAPI = async () => {
     }
 };
 
-// 4. 특정 게시글 제목 수정 (PATCH/{board_index}/title)
+// 4. 전체 게시글 조회 - 로그인 x (GET/)
+export const all_board_infoAPI = async () => {
+    try {
+        const response = await axiosInstance.get("/boards")
+        return response.data
+    } catch(error) {
+        console.error("전체 게시글 조회 에러: ", error);
+        throw error;
+    }
+};
+
+// 5. 특정 게시글 제목 수정 (PATCH/{board_index}/title)
 export const update_board_titleAPI = async (password, new_title, board_index) => {
     try {
         const response = await axiosInstance.patch(`/boards/${board_index}/title`, {
@@ -50,7 +61,7 @@ export const update_board_titleAPI = async (password, new_title, board_index) =>
     }
 };
 
-// 5. 특정 게시글 내용 수정 (PATCH/{board_index}/content)
+// 6. 특정 게시글 내용 수정 (PATCH/{board_index}/content)
 export const update_board_contentAPI = async (password, new_content, board_index) => {
     try {
         const response = await axiosInstance.patch(`/boards/${board_index}/content`, {
@@ -64,7 +75,7 @@ export const update_board_contentAPI = async (password, new_content, board_index
     }
 };
 
-// 6. 특정 게시글 삭제 (DELETE/{board_index})
+// 7. 특정 게시글 삭제 (DELETE/{board_index})
 export const delete_boardAPI = async (password, board_index) => {
     try {
         const response = await axiosInstance.delete(`/boards/${board_index}`, {
@@ -77,7 +88,7 @@ export const delete_boardAPI = async (password, board_index) => {
     }
 };
 
-// 7. 특정 게시글 복구 (POST/{board_index}/restore)
+// 8. 특정 게시글 복구 (POST/{board_index}/restore)
 export const restore_boardAPI = async (password, board_index) => {
     try {
         const response = await axiosInstance.post(`/boards/${board_index}/restore`, {

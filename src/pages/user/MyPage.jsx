@@ -45,7 +45,6 @@ export default function MyPage() {
     fetchMyData();
   }, [navigate]);
 
-  // --- 기존 계정 관리 로직 그대로 유지 ---
   const resetForms = () => {
     setPassword("");
     setNewId("");
@@ -127,7 +126,11 @@ export default function MyPage() {
           <ul className="my-board-list">
             {myBoards.map((board) => (
               <li key={board.index || board.board_index} className="my-board-item">
-                <Link to={`/board/${board.index || board.board_index}`} className="board-link">
+                <Link 
+                  to={`/board/${board.index || board.board_index}`} 
+                  state={{ fromMyPage: true }} 
+                  className="board-link"
+                >
                   <span className="board-title">{board.title}</span>
                   <span className="board-date">
                     {new Date(board.created_at || Date.now()).toLocaleDateString()}

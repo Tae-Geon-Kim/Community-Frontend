@@ -28,13 +28,13 @@ export default function BoardList() {
         setPosts(userPosts);
         setIsFiltered(true);
       } else {
-        // 🌟 2. 전체 목록 조회 시 데이터 평탄화 (작성자 이름 버그 완벽 해결!)
+        // 2. 전체 목록 조회 시 데이터 평탄화 (작성자 이름 버그 완벽 해결!)
         const response = await all_board_infoAPI();
         const allData = response.data || [];
         
         const flatPosts = allData.flatMap(userGroup => {
           const groupPosts = userGroup.posts || [];
-          // 💡 백엔드 스키마에 정의된 정확한 이름인 'author'를 사용합니다!
+          // 백엔드 스키마에 정의된 정확한 이름인 'author'를 사용합니다
           const authorId = userGroup.author || "알 수 없음";
 
           return groupPosts.map(post => ({
@@ -123,7 +123,7 @@ export default function BoardList() {
                 </td>
                 {/* 작성자 정상 출력 */}
                 <td>{post.user_id}</td> 
-                {/* 💡 날짜 버그 수정: 백엔드 스키마에 맞춰 reg_date 로 변경! */}
+                {/*  날짜 버그 수정: 백엔드 스키마에 맞춰 reg_date 로 변경! */}
                 <td>{new Date(post.reg_date || Date.now()).toLocaleDateString()}</td>
               </tr>
             ))}
