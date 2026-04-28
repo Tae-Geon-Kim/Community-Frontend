@@ -1,12 +1,17 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { my_infoAPI, update_idAPI, update_passwordAPI, delete_meAPI } from "@/api/user";
+import { user_board_infoAPI } from "@/api/board";
 import "@/styles/user/MyPage.css";
 
 export default function MyPage() {
   const navigate = useNavigate();
   
+  // 내 정보 & 게시글 상태
   const [userInfo, setUserInfo] = useState(null);
+  const [myBoards, setMyBoards] = useState([]);
+  
+  // 계정 관리 탭 상태
   const [activeTab, setActiveTab] = useState(""); 
   const [password, setPassword] = useState("");
   const [newId, setNewId] = useState("");
@@ -14,18 +19,33 @@ export default function MyPage() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    const fetchMyInfo = async () => {
+    const fetchMyData = async () => {
       try {
-        const data = await my_infoAPI();
-        setUserInfo(data.data || data); 
+        // 1. 내 정보 가져오기
+        const userRes = await my_infoAPI();
+        const userData = userRes.data || userRes;
+        setUserInfo(userData); 
+
+        // 2. 내 아이디로 내가 쓴 글 목록 가져오기
+        try {
+          const boardRes = await user_board_infoAPI(userData.id);
+          const boardsData = boardRes.data?.posts || boardRes.data || [];
+          setMyBoards(boardsData);
+        } catch (boardError) {
+          console.error("게시글 불러오기 실패:", boardError);
+          setMyBoards([]); // 게시글이 없거나 에러나면 빈 배열
+        }
+
       } catch (error) {
         alert("로그인이 필요하거나 정보 조회에 실패했습니다.");
         navigate("/login");
       }
     };
-    fetchMyInfo();
+    
+    fetchMyData();
   }, [navigate]);
 
+  // --- 기존 계정 관리 로직 그대로 유지 ---
   const resetForms = () => {
     setPassword("");
     setNewId("");
@@ -84,16 +104,45 @@ export default function MyPage() {
     }
   };
 
-  if (!userInfo) return <div className="mypage-container">로딩 중...</div>;
+  if (!userInfo) return <div className="mypage-container">데이터를 불러오는 중입니다...</div>;
 
   return (
     <div className="mypage-container">
       <h2>마이페이지</h2>
       
+      {/* 1. 내 정보 섹션 */}
       <div className="info-section">
         <p><strong>현재 아이디:</strong> {userInfo.id}</p>
+        {userInfo.reg_date && (
+          <p><strong>가입일:</strong> {new Date(userInfo.reg_date).toLocaleDateString()}</p>
+        )}
       </div>
 
+      {/* 2. 내가 쓴 글 섹션 */}
+      <div className="my-boards-section">
+        <h3>📝 내가 쓴 글</h3>
+        {myBoards.length === 0 ? (
+          <p className="no-boards">아직 작성한 글이 없습니다.</p>
+        ) : (
+          <ul className="my-board-list">
+            {myBoards.map((board) => (
+              <li key={board.index || board.board_index} className="my-board-item">
+                <Link to={`/board/${board.index || board.board_index}`} className="board-link">
+                  <span className="board-title">{board.title}</span>
+                  <span className="board-date">
+                    {new Date(board.created_at || Date.now()).toLocaleDateString()}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <hr className="divider" />
+
+      {/* 3. 계정 관리 섹션 */}
+      <h3 className="account-manage-title">⚙️ 계정 관리</h3>
       <div className="button-group">
         <button onClick={() => handleTabChange("id")} className="login-button btn-tab">아이디 변경</button>
         <button onClick={() => handleTabChange("password")} className="login-button btn-tab">비밀번호 변경</button>

@@ -1,5 +1,6 @@
+/* src/styles/user/MyPage.css */
 .mypage-container {
-  max-width: 400px;
+  max-width: 600px;
   margin: 50px auto;
   padding: 30px;
   background-color: #ffffff;
@@ -18,9 +19,80 @@
 }
 
 .info-section p {
-  margin: 0;
+  margin: 5px 0;
   color: #495057;
   font-size: 15px;
+}
+
+.my-boards-section {
+  text-align: left;
+  margin-bottom: 30px;
+}
+
+.my-boards-section h3 {
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.no-boards {
+  text-align: center;
+  color: #888;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.my-board-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.my-board-item {
+  border-bottom: 1px solid #e9ecef;
+}
+
+.my-board-item:last-child {
+  border-bottom: none;
+}
+
+.board-link {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px;
+  text-decoration: none;
+  color: #333;
+  transition: background-color 0.2s;
+}
+
+.board-link:hover {
+  background-color: #f1f3f5;
+}
+
+.board-title {
+  font-weight: 500;
+}
+
+.board-date {
+  font-size: 13px;
+  color: #868e96;
+}
+
+.divider {
+  border: none;
+  border-top: 2px dashed #e9ecef;
+  margin: 30px 0;
+}
+
+.account-manage-title {
+  text-align: left;
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 15px;
 }
 
 .button-group {
@@ -49,7 +121,6 @@
 }
 
 .action-section {
-  margin-top: 25px;
   padding: 25px;
   background-color: #ffffff;
   border: 2px solid #f0f0f0;
@@ -64,9 +135,39 @@
   color: #262626;
 }
 
+.input-wrapper {
+  margin-bottom: 10px;
+}
+
+
+.login-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
 .btn-save {
   margin-top: 15px;
   width: 100%;
+  padding: 12px;
+  background-color: #1890ff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-save:hover {
+  background-color: #40a9ff;
+}
+
+.error-message {
+  color: #ff4d4f;
+  font-size: 14px;
+  margin-bottom: 10px;
 }
 
 @keyframes fadeIn {
