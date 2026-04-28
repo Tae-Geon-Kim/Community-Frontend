@@ -131,3 +131,49 @@
 }
 
 .btn-delete-post:hover { background-color: #ff7875; }
+
+/* 첨부 파일 표시 영역 디자인 */
+.detail-files {
+  margin: 15px 0 25px 0;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border: 1px dashed #ced4da;
+}
+
+.detail-files h4 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: #495057;
+  font-size: 15px;
+}
+
+.file-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 14px;
+}
+
+.file-name {
+  color: #212529;
+  font-weight: 500;
+}
+
+.file-size {
+  color: #868e96;
+  font-size: 13px;
+}
+
+.no-files {
+  color: #adb5bd;
+  font-size: 14px;
+  margin: 0;
+}

@@ -1,20 +1,23 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; 
 import { all_board_infoAPI, user_board_infoAPI } from "@/api/board";
 import "@/styles/board/BoardList.css";
 
 export default function BoardList() {
+  const navigate = useNavigate(); 
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   
   const [searchId, setSearchId] = useState(""); 
   const [isFiltered, setIsFiltered] = useState(false); 
 
+  // 로컬 스토리지 토큰 유무로 로그인 상태 확인
+  const isLogin = !!(localStorage.getItem("token") || localStorage.getItem("access_token"));
+
   const fetchPosts = async (userId = "") => {
     setLoading(true);
     try {
       if (userId) {
-        // 1. 특정 유저 검색 시 데이터 처리
         const response = await user_board_infoAPI(userId);
         const data = response.data || {};
         
@@ -28,23 +31,19 @@ export default function BoardList() {
         setPosts(userPosts);
         setIsFiltered(true);
       } else {
-        // 2. 전체 목록 조회 시 데이터 평탄화 (작성자 이름 버그 완벽 해결!)
         const response = await all_board_infoAPI();
         const allData = response.data || [];
         
         const flatPosts = allData.flatMap(userGroup => {
           const groupPosts = userGroup.posts || [];
-          // 백엔드 스키마에 정의된 정확한 이름인 'author'를 사용합니다
           const authorId = userGroup.author || "알 수 없음";
 
           return groupPosts.map(post => ({
             ...post,
-            // 프론트엔드 테이블에서 user_id로 렌더링하도록 통일
             user_id: authorId
           }));
         });
         
-        // 최신 글이 맨 위로 오게 정렬
         flatPosts.sort((a, b) => {
           const indexA = a.index || a.board_index || 0;
           const indexB = b.index || b.board_index || 0;
@@ -81,7 +80,15 @@ export default function BoardList() {
 
   return (
     <div className="board-list-container">
-      <h2>자유 게시판</h2>
+      {/* 타이틀과 글쓰기 버튼 영역 */}
+      <div className="board-title-header">
+        <h2>자유 게시판</h2>
+        {isLogin && (
+          <button onClick={() => navigate("/board/create")} className="btn-write-post">
+            📝 새 글 쓰기
+          </button>
+        )}
+      </div>
 
       <div className="search-bar">
         <input 
@@ -121,9 +128,7 @@ export default function BoardList() {
                 <td className="post-title">
                   <Link to={`/board/${post.index || post.board_index}`}>{post.title}</Link>
                 </td>
-                {/* 작성자 정상 출력 */}
                 <td>{post.user_id}</td> 
-                {/*  날짜 버그 수정: 백엔드 스키마에 맞춰 reg_date 로 변경! */}
                 <td>{new Date(post.reg_date || Date.now()).toLocaleDateString()}</td>
               </tr>
             ))}

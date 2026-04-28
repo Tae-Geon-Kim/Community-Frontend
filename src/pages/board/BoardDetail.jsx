@@ -15,7 +15,6 @@ export default function BoardDetail() {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // 마이페이지에서 넘어온 '내 글'인지 확인!
   const isMyPost = location.state?.fromMyPage === true;
   
   const [board, setBoard] = useState(null);
@@ -27,11 +26,9 @@ export default function BoardDetail() {
   const [newContent, setNewContent] = useState("");
   const [password, setPassword] = useState("");
 
-  // 에러 해결을 위한 공통 에러 처리기
   const showErrorAlert = (error, defaultMsg) => {
     const detail = error.response?.data?.detail;
     if (Array.isArray(detail)) {
-      // Pydantic 형식 에러 (배열 형태) -> 첫 번째 에러 메시지만
       alert(detail[0].msg);
     } else if (typeof detail === "string") {
       alert(detail);
@@ -133,7 +130,6 @@ export default function BoardDetail() {
         ) : (
           <h2 className="detail-title">
             {board.title}
-            {/* isMyPost가 true일 때만 수정 펜 아이콘 보이기 */}
             {isMyPost && (
               <button onClick={() => setIsEditTitle(true)} className="btn-icon-edit" title="제목 수정">📝</button>
             )}
@@ -147,6 +143,24 @@ export default function BoardDetail() {
       </div>
 
       <hr className="detail-divider" />
+
+      {/* 첨부 파일 표시 영역 */}
+      <div className="detail-files">
+        <h4>📎 첨부 파일</h4>
+        {board.files && board.files.length > 0 ? (
+          <ul className="file-list">
+            {board.files.map((file, idx) => (
+              <li key={idx} className="file-item">
+                <span className="file-icon">💾</span>
+                <span className="file-name">{file.original_name}</span>
+                <span className="file-size">({file.file_size})</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="no-files">첨부된 파일이 없습니다.</p>
+        )}
+      </div>
 
       <div className="detail-body">
         {isEditContent ? (
@@ -171,7 +185,6 @@ export default function BoardDetail() {
         ) : (
           <div className="content-view">
             <p className="content-text">{board.content}</p>
-            {/* isMyPost가 true일 때만 내용 수정 버튼 보이기 */}
             {isMyPost && (
               <button onClick={() => setIsEditContent(true)} className="btn-text-edit">내용 수정하기</button>
             )}
@@ -182,7 +195,6 @@ export default function BoardDetail() {
       <div className="detail-footer">
         <button onClick={() => navigate("/board")} className="btn-back-list">목록으로 돌아가기</button>
         
-        {/* isMyPost가 true일 때만 삭제 구역 보이기 */}
         {isMyPost && !isEditTitle && !isEditContent && (
           <div className="delete-section">
             <input 
