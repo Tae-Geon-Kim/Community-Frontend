@@ -8,7 +8,8 @@ import {
 } from "@/api/board";
 import { 
   upload_fileAPI, 
-  delete_single_fileAPI 
+  delete_single_fileAPI,
+  restore_single_fileAPI
 } from "@/api/file";
 import "@/styles/board/BoardDetail.css";
 
@@ -29,7 +30,6 @@ export default function BoardDetail() {
   const [newFiles, setNewFiles] = useState([]); 
   const [filesToDelete, setFilesToDelete] = useState([]); 
 
-  // 삭제 모달 전용 상태
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletePassword, setDeletePassword] = useState("");
 
@@ -52,6 +52,7 @@ export default function BoardDetail() {
     fetchDetail();
   }, [id]);
 
+  // ---------------- 저장 로직 ----------------
   const handleSaveEdit = async () => {
     if (!password) {
       alert("수정을 위해 비밀번호를 입력해주세요.");
@@ -98,9 +99,29 @@ export default function BoardDetail() {
     }
   };
 
+  // ---------------- 파일 삭제 대기 ----------------
   const handleMarkFileForDelete = (fileIndex) => {
     if(window.confirm("이 파일을 삭제하시겠습니까? (저장 버튼을 눌러야 완전히 삭제됩니다)")) {
       setFilesToDelete(prev => [...prev, fileIndex]);
+    }
+  };
+
+  // ---------------- 파일 복구 로직 ----------------
+  const handleRestoreFile = async (fileIndex) => {
+    if (!password) {
+      alert("복구 권한 확인을 위해 상단에 비밀번호를 먼저 입력해주세요!");
+      return;
+    }
+    if(window.confirm("이 파일을 다시 복구하시겠습니까?")) {
+      try {
+        await restore_single_fileAPI(password, id, fileIndex);
+        alert("파일이 성공적으로 복구되었습니다!");
+        fetchDetail(); // 복구 완료 후 화면 최신화
+      } catch (error) {
+        console.error("복구 에러:", error);
+        const errMsg = error.response?.data?.detail?.[0]?.msg || error.response?.data?.detail || "복구에 실패했습니다. 용량 초과 또는 비밀번호를 확인해주세요.";
+        alert(errMsg);
+      }
     }
   };
 
@@ -108,17 +129,13 @@ export default function BoardDetail() {
     setNewFiles(Array.from(e.target.files));
   };
 
-  // 삭제 버튼 클릭 시 모달 오픈
+  // ---------------- 게시글 삭제 ----------------
   const onClickDeleteButton = () => {
     setIsDeleteModalOpen(true);
   };
 
-  // 모달 내 '삭제 확인' 클릭 시 실제 삭제 수행
   const confirmDeleteBoard = async () => {
-    if (!deletePassword) {
-      alert("비밀번호를 입력해주세요.");
-      return;
-    }
+    if (!deletePassword) return alert("비밀번호를 입력해주세요.");
 
     if (window.confirm("정말로 이 게시글을 삭제하시겠습니까? (첨부된 파일도 모두 삭제됩니다)")) {
       try {
@@ -126,7 +143,6 @@ export default function BoardDetail() {
         alert("게시글이 삭제되었습니다.");
         navigate("/board");
       } catch (error) {
-        console.error("삭제 에러:", error);
         alert("삭제에 실패했습니다. 비밀번호를 확인해주세요.");
       } finally {
         setIsDeleteModalOpen(false);
@@ -137,6 +153,10 @@ export default function BoardDetail() {
 
   if (loading) return <div className="loading">로딩 중...</div>;
   if (!board) return null;
+
+  // 렌더링 전 파일을 두 그룹(정상/삭제됨)으로 나눕니다
+  const activeFiles = board.files?.filter(f => !f.deleted_at) || [];
+  const deletedFiles = board.files?.filter(f => f.deleted_at) || [];
 
   return (
     <div className="board-detail-container">
@@ -167,30 +187,53 @@ export default function BoardDetail() {
             value={editTitle} 
             onChange={(e) => setEditTitle(e.target.value)} 
             className="edit-input-title" 
-            placeholder="제목"
           />
 
           <div className="edit-files-section">
-            <h4>📎 기존 첨부 파일 (삭제할 파일의 X를 누르세요)</h4>
-            <ul className="file-list">
-              {board.files?.map((file) => {
-                if (filesToDelete.includes(file.index || file.file_index)) return null;
-                
-                return (
-                  <li key={file.index || file.file_index} className="file-item">
-                    <span>💾 {file.original_name}</span>
-                    <button 
-                      onClick={() => handleMarkFileForDelete(file.index || file.file_index)}
-                      className="btn-file-delete"
-                    >
-                      ❌
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
+            {/* 1. 현재 정상적인 파일 목록 */}
+            <h4>📎 기존 첨부 파일 (삭제: ❌ 클릭)</h4>
+            {activeFiles.length > 0 ? (
+              <ul className="file-list">
+                {activeFiles.map((file) => {
+                  if (filesToDelete.includes(file.index || file.file_index)) return null;
+                  return (
+                    <li key={file.index || file.file_index} className="file-item">
+                      <span>💾 {file.original_name}</span>
+                      <button 
+                        onClick={() => handleMarkFileForDelete(file.index || file.file_index)}
+                        className="btn-file-delete"
+                      >
+                        ❌
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : <p className="no-files">정상 파일이 없습니다.</p>}
 
-            <div className="new-file-upload">
+            {/* 2. 휴지통 (삭제된 파일 목록) */}
+            {deletedFiles.length > 0 && (
+              <div className="deleted-files-wrapper" style={{ marginTop: '20px', padding: '10px', backgroundColor: '#fdf0f0', borderRadius: '8px' }}>
+                <h4 style={{ color: '#d9534f', margin: '0 0 10px 0' }}>휴지통 (복구 가능 파일)</h4>
+                <ul className="file-list">
+                  {deletedFiles.map((file) => (
+                    <li key={file.index || file.file_index} className="file-item">
+                      <span style={{ textDecoration: 'line-through', color: '#999' }}>💾 {file.original_name}</span>
+                      <button 
+                        onClick={() => handleRestoreFile(file.index || file.file_index)}
+                        className="btn-save"
+                        style={{ padding: '4px 8px', fontSize: '12px', marginLeft: '10px' }}
+                      >
+                        복구
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* 3. 새 파일 업로드 */}
+            <div className="new-file-upload" style={{ marginTop: '20px' }}>
               <label htmlFor="edit-file-input" className="file-label">➕ 새 파일 추가하기</label>
               <input 
                 id="edit-file-input"
@@ -211,10 +254,10 @@ export default function BoardDetail() {
             value={editContent} 
             onChange={(e) => setEditContent(e.target.value)} 
             className="edit-textarea-content" 
-            placeholder="내용"
           />
         </div>
       ) : (
+        /* 일반 조회 모드 (activeFiles만 보여줌) */
         <>
           <div className="detail-header">
             <div className="title-row">
@@ -235,10 +278,10 @@ export default function BoardDetail() {
           <hr className="detail-divider" />
 
           <div className="detail-files">
-            <h4>📎 첨부 파일 ({board.files?.length || 0})</h4>
-            {board.files && board.files.length > 0 ? (
+            <h4>📎 첨부 파일 ({activeFiles.length})</h4>
+            {activeFiles.length > 0 ? (
               <ul className="file-list">
-                {board.files.map((file, idx) => (
+                {activeFiles.map((file, idx) => (
                   <li key={idx} className="file-item">
                     <span className="file-icon">💾</span>
                     <span className="file-name">{file.original_name}</span>
@@ -258,11 +301,11 @@ export default function BoardDetail() {
         </>
       )}
 
-      {/* 게시글 삭제용 비밀번호 입력 모달 */}
+      {/* 모달 UI */}
       {isDeleteModalOpen && (
         <div className="delete-modal-overlay">
           <div className="delete-modal">
-            <h3>🗑️ 게시글 삭제</h3>
+            <h3>게시글 삭제</h3>
             <p>삭제를 완료하려면 비밀번호를 입력해주세요.</p>
             <input
               type="password"
