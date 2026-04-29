@@ -132,3 +132,7 @@
 .btn-write-post:hover {
   background-color: #0056b3;
 }
+
+.board-title-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.btn-write-post { padding: 10px 18px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+.btn-write-post:hover { background-color: #0056b3; }

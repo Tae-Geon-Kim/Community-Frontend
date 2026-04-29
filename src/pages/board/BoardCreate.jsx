@@ -16,7 +16,7 @@ export default function BoardCreate() {
     setFiles(Array.from(e.target.files));
   };
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault(); 
     
     if (!title.trim() || !content.trim()) {
@@ -25,19 +25,23 @@ export default function BoardCreate() {
     }
 
     try {
-      
+      // 게시글 생성
       const res = await register_board_API(title, content);
       
-      // 백엔드에서 응답한 새 게시글의 인덱스 번호 추출
-      const newBoardIndex = res.data?.board_index || res.board_index; 
+      console.log("백엔드 응답 데이터:", res); 
+
+      const newBoardIndex = 
+        res?.data?.board_index || 
+        res?.board_index || 
+        res?.data?.data?.board_index || 
+        res?.detail?.board_index; 
 
       if (!newBoardIndex) {
-        throw new Error("게시글은 생성되었으나 번호를 받아오지 못했습니다.");
+        throw new Error(`게시글은 생성되었으나 번호를 받아오지 못했습니다. (응답값: ${JSON.stringify(res)})`);
       }
 
-      // 첨부할 파일이 존재한다면, 방금 만든 게시글 번호를 타겟으로 파일 전송
+      // 첨부할 파일 전송
       if (files.length > 0) {
-        // Promise.all을 사용해 여러 파일을 병렬로 업로드 처리
         await Promise.all(
           files.map(file => upload_fileAPI(file, newBoardIndex))
         );
@@ -47,11 +51,11 @@ export default function BoardCreate() {
       navigate("/board"); 
     } catch (error) {
       console.error("작성 에러:", error);
-      // 백엔드에서 보내는 에러 메시지가 있다면 우선적으로 표시
-      const errMsg = error.response?.data?.detail?.[0]?.msg || error.response?.data?.detail || "글 작성 또는 파일 업로드에 실패했습니다. (용량이나 확장자를 확인해주세요)";
+      const errMsg = error.response?.data?.detail?.[0]?.msg || error.response?.data?.detail || error.message || "글 작성 또는 파일 업로드에 실패했습니다.";
       alert(errMsg);
     }
   };
+
 
   return (
     <div className="board-container">

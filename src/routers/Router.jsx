@@ -12,17 +12,15 @@ export default function Router() {
   return (
     <BrowserRouter>
       <Header />
-
       <Routes>
-
         <Route path="/" element={<HomePage />} />   
-             
         <Route path="/login" element={<Login />} /> 
         <Route path="/register" element={<Register />} /> 
         <Route path="/mypage" element={<MyPage />} />
         
+        {/* 게시판 관련 라우터 순서 조정 완료 */}
         <Route path="/board" element={<BoardList />} /> 
-        <Route path="/board/write" element={<BoardCreate />} /> 
+        <Route path="/board/create" element={<BoardCreate />} />
         <Route path="/board/:id" element={<BoardDetail />} /> 
       </Routes>
     </BrowserRouter>
